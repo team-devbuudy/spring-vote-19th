@@ -1,8 +1,9 @@
 package ceos.springvote.constant;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonValue;
 import lombok.Getter;
 
-@Getter
 public enum Part {
     TYPE1(0, "BACKEND"),
     TYPE2(1, "FRONTEND");
@@ -15,6 +16,7 @@ public enum Part {
         this.text = text;
     }
 
+    @JsonCreator
     public static Part fromText(String text) {
         for (Part part : Part.values()) {
             if (part.getText().equals(text)) {
@@ -22,6 +24,15 @@ public enum Part {
             }
         }
         return null;
+    }
+
+    public Integer getIdx() {
+        return idx;
+    }
+
+    @JsonValue
+    public String getText() {
+        return text;
     }
 
     public static Part fromIdx(Integer idx) {

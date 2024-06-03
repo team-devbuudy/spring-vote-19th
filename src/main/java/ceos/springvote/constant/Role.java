@@ -1,8 +1,9 @@
 package ceos.springvote.constant;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonValue;
 import lombok.Getter;
 
-@Getter
 public enum Role {
     TYPE1(0, "USER"),
     TYPE2(1, "GUEST");
@@ -15,9 +16,19 @@ public enum Role {
         this.text = text;
     }
 
-    public static Role fromText(String text){
-        for(Role role : Role.values()){
-            if(role.getText().equals(text)){
+    public int getIdx() {
+        return idx;
+    }
+
+    @JsonValue
+    public String getText() {
+        return text;
+    }
+
+    @JsonCreator
+    public static Role fromText(String text) {
+        for (Role role : Role.values()) {
+            if (role.getText().equals(text)) {
                 return role;
             }
         }
@@ -26,7 +37,7 @@ public enum Role {
 
     public static Role fromIdx(int idx) {
         for (Role role : Role.values()) {
-            if(role.getIdx() == idx){
+            if (role.getIdx() == idx) {
                 return role;
             }
         }

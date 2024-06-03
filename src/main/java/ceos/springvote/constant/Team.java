@@ -1,14 +1,15 @@
 package ceos.springvote.constant;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonValue;
 import lombok.Getter;
 
-@Getter
 public enum Team {
-    TYPE1(0,"Azito"),
-    TYPE2(1,"BeatBuddy"),
-    TYPE3(2,"Buldog"),
-    TYPE4(3,"Couplelog"),
-    TYPE5(4,"TIG");
+    TYPE1(0, "Azito"),
+    TYPE2(1, "BeatBuddy"),
+    TYPE3(2, "Buldog"),
+    TYPE4(3, "Couplelog"),
+    TYPE5(4, "TIG");
 
     private int idx;
     private String text;
@@ -18,6 +19,16 @@ public enum Team {
         this.text = text;
     }
 
+    public int getIdx() {
+        return idx;
+    }
+
+    @JsonValue
+    public String getText() {
+        return text;
+    }
+
+    @JsonCreator
     public static Team fromText(String text) {
         for (Team role : Team.values()) {
             if (role.getText().equals(text)) {
