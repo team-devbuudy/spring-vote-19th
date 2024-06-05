@@ -1,20 +1,35 @@
 package ceos.springvote.jwt;
 
+import ceos.springvote.jwt.filter.LoginFilter;
+import ceos.springvote.jwt.util.JwtUtil;
+import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
 @Configuration
 @EnableWebSecurity
+@RequiredArgsConstructor
 public class SecurityConfig {
+
+    private final AuthenticationConfiguration authenticationConfiguration;
+    private final JwtUtil jwtUtil;
 
     @Bean
     public BCryptPasswordEncoder bCryptPasswordEncoder(){
         return new BCryptPasswordEncoder();
+    }
+
+    @Bean
+    public AuthenticationManager authenticationManager(AuthenticationConfiguration configuration) throws Exception {
+        return configuration.getAuthenticationManager();
     }
 
     @Bean
@@ -28,9 +43,11 @@ public class SecurityConfig {
                 httpBasic((auth)->auth.disable());
         http
                 .authorizeHttpRequests((auth) -> auth
-                        .requestMatchers("/vote").permitAll()
-                        .requestMatchers("/login", "/", "/join").hasRole("USER")
+                        .requestMatchers("/login", "/", "/join").permitAll()
+                        .requestMatchers("/vote").hasRole("USER")
                         .anyRequest().authenticated());
+        http
+                .addFilterAt(new LoginFilter(authenticationManager(authenticationConfiguration),jwtUtil), UsernamePasswordAuthenticationFilter.class);
 
         http
                 .sessionManagement((session) -> session
@@ -38,4 +55,7 @@ public class SecurityConfig {
 
         return http.build();
     }
+
+
+
 }
