@@ -1,8 +1,10 @@
 package ceos.springvote.jwt;
 
+import ceos.springvote.jwt.filter.JwtFilter;
 import ceos.springvote.jwt.filter.LoginFilter;
 import ceos.springvote.jwt.util.JwtUtil;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -16,11 +18,16 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 
 @Configuration
 @EnableWebSecurity
-@RequiredArgsConstructor
 public class SecurityConfig {
 
     private final AuthenticationConfiguration authenticationConfiguration;
     private final JwtUtil jwtUtil;
+
+    @Autowired
+    public SecurityConfig(AuthenticationConfiguration authenticationConfiguration, JwtUtil jwtUtil) {
+        this.authenticationConfiguration = authenticationConfiguration;
+        this.jwtUtil = jwtUtil;
+    }
 
     @Bean
     public BCryptPasswordEncoder bCryptPasswordEncoder(){
@@ -46,6 +53,8 @@ public class SecurityConfig {
                         .requestMatchers("/login", "/", "/join").permitAll()
                         .requestMatchers("/vote").hasRole("USER")
                         .anyRequest().authenticated());
+        http
+                .addFilterBefore(new JwtFilter(jwtUtil), LoginFilter.class);
         http
                 .addFilterAt(new LoginFilter(authenticationManager(authenticationConfiguration),jwtUtil), UsernamePasswordAuthenticationFilter.class);
 

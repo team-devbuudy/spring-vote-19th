@@ -10,6 +10,7 @@ import java.util.Collection;
 import java.util.Date;
 import java.util.Iterator;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -17,12 +18,18 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+import org.springframework.stereotype.Component;
 
-@RequiredArgsConstructor
 public class LoginFilter extends UsernamePasswordAuthenticationFilter {
 
     private final AuthenticationManager authenticationManager;
     private final JwtUtil jwtUtil;
+
+    @Autowired
+    public LoginFilter(AuthenticationManager authenticationManager, JwtUtil jwtUtil) {
+        this.authenticationManager = authenticationManager;
+        this.jwtUtil = jwtUtil;
+    }
 
     @Override
     public Authentication attemptAuthentication(HttpServletRequest request, HttpServletResponse response)
@@ -35,6 +42,7 @@ public class LoginFilter extends UsernamePasswordAuthenticationFilter {
         //spring security에서 username과 password 검증하려면 token(DTO)에 담아야 함
         UsernamePasswordAuthenticationToken authToken = new UsernamePasswordAuthenticationToken(username, password,
                 null);
+
 
         //authToken 검증을 위해 AuthenticationManager로 전달
         return authenticationManager.authenticate(authToken);
