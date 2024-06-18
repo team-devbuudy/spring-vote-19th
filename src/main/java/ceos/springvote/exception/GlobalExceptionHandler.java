@@ -9,7 +9,7 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 @Slf4j
 public class GlobalExceptionHandler {
 
-    @ExceptionHandler(MemberException.class)
+    @ExceptionHandler(CustomException.class)
     public ResponseEntity<ResponseTemplate> handleCustomException(ResponseException exception){
         log.error("Exception description: " + exception.getMessage());
         return ResponseTemplate.toResponseEntity(exception.getStatus(), exception.getMessage());

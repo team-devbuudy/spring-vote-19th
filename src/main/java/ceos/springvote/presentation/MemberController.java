@@ -1,10 +1,9 @@
 package ceos.springvote.presentation;
 
 import ceos.springvote.application.MemberService;
-import ceos.springvote.dto.MemberErrorCodeResponse;
 import ceos.springvote.dto.MemberRequestDto;
-import ceos.springvote.exception.MemberErrorCode;
-import ceos.springvote.exception.MemberException;
+import ceos.springvote.exception.CustomException;
+import ceos.springvote.exception.ResponseTemplate;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
@@ -36,10 +35,10 @@ public class MemberController {
             }),
             @ApiResponse(responseCode = "409", description = "아이디 혹은 이메일이 중복이면 에러 정보를 반환합니다",
                     content = {@Content(mediaType = "application/json",
-                    schema = @Schema(implementation = MemberErrorCodeResponse.class))
+                    schema = @Schema(implementation = ResponseTemplate.class))
             })
     })
-    public ResponseEntity<Long> join(@RequestBody MemberRequestDto request) throws MemberException{
+    public ResponseEntity<Long> join(@RequestBody MemberRequestDto request) throws CustomException{
             return ResponseEntity.ok(memberService.join(request));
     }
 }
