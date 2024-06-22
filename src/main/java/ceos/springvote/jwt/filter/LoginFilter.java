@@ -6,6 +6,7 @@ import jakarta.servlet.FilterChain;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 
+import java.io.IOException;
 import java.util.Collection;
 import java.util.Iterator;
 import lombok.RequiredArgsConstructor;
@@ -17,6 +18,9 @@ import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import com.fasterxml.jackson.databind.ObjectMapper;
+
+import java.util.Map;
+import java.util.HashMap;
 
 @RequiredArgsConstructor
 public class LoginFilter extends UsernamePasswordAuthenticationFilter {
@@ -48,7 +52,7 @@ public class LoginFilter extends UsernamePasswordAuthenticationFilter {
                                             FilterChain filterChain, Authentication authentication) {
         CustomUserDetails userDetails = (CustomUserDetails) authentication.getPrincipal();
 
-        String loginId = userDetails.getUsername();
+        String loginId = userDetails.getLoginId();
 
         Collection<? extends GrantedAuthority> authorities = authentication.getAuthorities();
         Iterator<? extends GrantedAuthority> iterator = authorities.iterator();
@@ -58,6 +62,32 @@ public class LoginFilter extends UsernamePasswordAuthenticationFilter {
         String token = jwtUtil.createJwt(loginId, role, 1000 * 60 * 60L);
 
         response.addHeader("Access", "Bearer "+token);
+
+        // 회원 정보를 JSON 형식으로 변환
+        String userInfoJson;
+        try {
+            // 필요한 회원 정보만 포함하도록 새로운 객체 생성
+            Map<String, Object> userInfo = new HashMap<>();
+            userInfo.put("loginId", userDetails.getLoginId());
+            userInfo.put("password", userDetails.getPassword());
+            userInfo.put("username", userDetails.getUsername());
+            userInfo.put("role", role);
+
+            // JSON으로 변환
+            userInfoJson = objectMapper.writeValueAsString(userInfo);
+        } catch (Exception e) {
+            throw new RuntimeException("Failed to convert user info to JSON", e);
+        }
+
+        // 응답 본문에 회원 정보 추가
+        try {
+            response.setContentType("application/json");
+            response.setCharacterEncoding("UTF-8");
+            response.getWriter().write(userInfoJson);
+        } catch (IOException e) {
+            throw new RuntimeException("Failed to write user info to response", e);
+        }
+
         response.setStatus(HttpStatus.OK.value());
     }
 
