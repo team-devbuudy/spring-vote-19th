@@ -21,7 +21,9 @@ import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
+import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 
+import java.util.Arrays;
 import java.util.Collections;
 
 @Configuration
@@ -35,15 +37,14 @@ public class SecurityConfig {
 
     @Bean
     CorsConfigurationSource corsConfigurationSource() {
-        return request -> {
-            CorsConfiguration config = new CorsConfiguration();
-            config.setAllowedHeaders(Collections.singletonList("*")); //모든 종류의 HTTP 헤더를 허용하도록 설정
-            config.setAllowedMethods(Collections.singletonList("*")); //모든 종류의 HTTP 메소드를 허용하도록 설정
-            //config.setAllowedOriginPatterns(Collections.singletonList("http://localhost:3000")); // 허용할 origin
-            config.setAllowedOriginPatterns(Collections.singletonList("http://localhost:8080")); // 허용할 origin
-            config.setAllowCredentials(true); //인증 정보와 관련된 요청을 허용
-            return config;
-        };
+        CorsConfiguration config = new CorsConfiguration();
+        config.setAllowedHeaders(Collections.singletonList("*")); //모든 종류의 HTTP 헤더를 허용하도록 설정
+        config.setAllowedMethods(Collections.singletonList("*")); //모든 종류의 HTTP 메소드를 허용하도록 설정
+        config.setAllowedOriginPatterns(Arrays.asList("http://localhost:3000", "http://43.201.123.205:3000")); // 허용할 origin 추가
+        config.setAllowCredentials(true); //인증 정보와 관련된 요청을 허용
+        UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
+        source.registerCorsConfiguration("/**", config);
+        return source;
     }
 
     @Bean
@@ -70,10 +71,15 @@ public class SecurityConfig {
 
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception{
+
         JwtFilter jwtFilter = new JwtFilter(jwtUtil);
         LoginFilter loginFilter = new LoginFilter(authenticationManager(), jwtUtil, memberRepository);
 
         loginFilter.setFilterProcessesUrl("/login");
+
+        // CORS 설정 적용
+        http.cors(customizer -> customizer.configurationSource(corsConfigurationSource()));
+
         http.
                 csrf((auth)-> auth.disable());
         http.
