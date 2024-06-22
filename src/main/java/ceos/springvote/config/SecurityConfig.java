@@ -23,6 +23,7 @@ import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 
+import java.util.Arrays;
 import java.util.Collections;
 
 @Configuration
@@ -39,7 +40,7 @@ public class SecurityConfig {
         CorsConfiguration config = new CorsConfiguration();
         config.setAllowedHeaders(Collections.singletonList("*")); //모든 종류의 HTTP 헤더를 허용하도록 설정
         config.setAllowedMethods(Collections.singletonList("*")); //모든 종류의 HTTP 메소드를 허용하도록 설정
-        config.setAllowedOriginPatterns(Collections.singletonList("http://43.201.123.205:3000")); // 허용할 origin
+        config.setAllowedOriginPatterns(Arrays.asList("http://localhost:3000", "http://43.201.123.205:3000")); // 허용할 origin 추가
         config.setAllowCredentials(true); //인증 정보와 관련된 요청을 허용
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
         source.registerCorsConfiguration("/**", config);
