@@ -3,14 +3,12 @@ package ceos.springvote.jwt.filter;
 import ceos.springvote.jwt.util.JwtUtil;
 import ceos.springvote.jwt.domain.CustomUserDetails;
 import jakarta.servlet.FilterChain;
-import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+
 import java.util.Collection;
-import java.util.Date;
 import java.util.Iterator;
 import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -18,29 +16,25 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
-import org.springframework.stereotype.Component;
+import com.fasterxml.jackson.databind.ObjectMapper;
 
+@RequiredArgsConstructor
 public class LoginFilter extends UsernamePasswordAuthenticationFilter {
 
     private final AuthenticationManager authenticationManager;
     private final JwtUtil jwtUtil;
-
-    @Autowired
-    public LoginFilter(AuthenticationManager authenticationManager, JwtUtil jwtUtil) {
-        this.authenticationManager = authenticationManager;
-        this.jwtUtil = jwtUtil;
-    }
+    private final ObjectMapper objectMapper = new ObjectMapper(); // JSON 파서를 위한 ObjectMapper
 
     @Override
     public Authentication attemptAuthentication(HttpServletRequest request, HttpServletResponse response)
             throws AuthenticationException {
 
-        //client 요청에서 username, password 추출
-        String username = obtainUsername(request);
+        //client 요청에서 loginId, password 추출
+        String loginId = obtainLoginId(request);
         String password = obtainPassword(request);
 
-        //spring security에서 username과 password 검증하려면 token(DTO)에 담아야 함
-        UsernamePasswordAuthenticationToken authToken = new UsernamePasswordAuthenticationToken(username, password,
+        //spring security에서 loginId와 password 검증하려면 token(DTO)에 담아야 함
+        UsernamePasswordAuthenticationToken authToken = new UsernamePasswordAuthenticationToken(loginId, password,
                 null);
 
 
@@ -54,16 +48,16 @@ public class LoginFilter extends UsernamePasswordAuthenticationFilter {
                                             FilterChain filterChain, Authentication authentication) {
         CustomUserDetails userDetails = (CustomUserDetails) authentication.getPrincipal();
 
-        String userName = userDetails.getUsername();
+        String loginId = userDetails.getUsername();
 
         Collection<? extends GrantedAuthority> authorities = authentication.getAuthorities();
         Iterator<? extends GrantedAuthority> iterator = authorities.iterator();
         GrantedAuthority auth = iterator.next();
 
         String role = auth.getAuthority();
-        String token = jwtUtil.createJwt(userName, role, 60*60*10L);
+        String token = jwtUtil.createJwt(loginId, role, 1000 * 60 * 60L);
 
-        response.addHeader("Authorization", "Bearer "+token);
+        response.addHeader("Access", "Bearer "+token);
         response.setStatus(HttpStatus.OK.value());
     }
 
@@ -73,6 +67,11 @@ public class LoginFilter extends UsernamePasswordAuthenticationFilter {
     protected void unsuccessfulAuthentication(HttpServletRequest request, HttpServletResponse response,
                                               AuthenticationException exception) {
         response.setStatus(401);
+    }
+
+    // loginId를 요청에서 추출하는 메서드 추가
+    protected String obtainLoginId(HttpServletRequest request) {
+        return request.getParameter("loginId"); // request 파라미터에서 loginId를 추출
     }
 
 }

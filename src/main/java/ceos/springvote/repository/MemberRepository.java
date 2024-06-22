@@ -10,4 +10,6 @@ public interface MemberRepository extends JpaRepository<Member, Long> {
 
     public Boolean existsDistinctByEmail(String email);
 
+    public Member findByName(String name);
+    public Member findByLoginId(String loginId);
 }

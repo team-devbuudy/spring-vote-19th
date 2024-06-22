@@ -19,14 +19,14 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
-@RequestMapping("/members/")
+@RequestMapping("/members")
 @Tag(name = "Member Controller", description = "멤버 컨트롤러")
 @RequiredArgsConstructor
 @Slf4j
 public class MemberController {
     private final MemberService memberService;
 
-    @PostMapping
+    @PostMapping("/join")
     @Operation(summary = "회원가입 로직", description = "ID와 PASSWORD를 입력해 회원가입을 진행한다")
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "회원가입 성공 시 고유 ID를 반환합니다",
@@ -39,6 +39,7 @@ public class MemberController {
             })
     })
     public ResponseEntity<Long> join(@RequestBody MemberRequestDto request) throws CustomException{
-            return ResponseEntity.ok(memberService.join(request));
+        System.out.println(request.getLoginId());
+        return ResponseEntity.ok(memberService.join(request));
     }
 }

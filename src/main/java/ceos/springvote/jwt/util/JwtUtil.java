@@ -23,6 +23,11 @@ public class JwtUtil { //JWT를 생성하고 검증하기 위한 utility 클래�
         secretKey = new SecretKeySpec(key.getBytes(StandardCharsets.UTF_8), Jwts.SIG.HS256.key().build().getAlgorithm());
     }
 
+    //loginId 확인
+    public String getLoginId(String token) {
+        return Jwts.parser().verifyWith(secretKey).build().parseSignedClaims(token).getPayload().get("loginId", String.class);
+    }
+
     //username 확인
     public String getUsername(String token) {
         return Jwts.parser().verifyWith(secretKey).build().parseSignedClaims(token).getPayload().get("username", String.class);
@@ -38,9 +43,9 @@ public class JwtUtil { //JWT를 생성하고 검증하기 위한 utility 클래�
         return Jwts.parser().verifyWith(secretKey).build().parseSignedClaims(token).getPayload().getExpiration().before(new Date());
     }
 
-    public String createJwt(String username, String role, Long expiredMs) {
+    public String createJwt(String loginId, String role, Long expiredMs) {
         return Jwts.builder()
-                .claim("username", username)
+                .claim("loginId", loginId)
                 .claim("role", role)
                 .issuedAt(new Date(System.currentTimeMillis()))
                 .expiration(new Date(System.currentTimeMillis() + expiredMs))

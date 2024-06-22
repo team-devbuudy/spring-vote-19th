@@ -11,6 +11,7 @@ import java.beans.Encoder;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 //import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -21,14 +22,15 @@ import org.springframework.transaction.annotation.Transactional;
 public class MemberService {
     private final MemberRepository memberRepository;
     private final TeamRepository teamRepository;
+    private final BCryptPasswordEncoder bCryptPasswordEncoder;
     // private final BCryptPasswordEncoder encoder = new BCryptPasswordEncoder();
 
     @Transactional
     public Long join(MemberRequestDto request) throws CustomException {
         Team targetTeam = teamRepository.findById(request.getTeamId())
                 .orElseThrow(() -> new CustomException(MemberErrorCode.TEAM_NOT_EXIST));
-//      Member member = request.toEntity(targetTeam, encoder.encode(request.getPassword()));
-        Member member = request.toEntity(targetTeam, request.getPassword());
+        Member member = request.toEntity(targetTeam, bCryptPasswordEncoder.encode(request.getPassword()));
+        //Member member = request.toEntity(targetTeam, request.getPassword());
         isDuplicate(member);
         return memberRepository.save(member).getId();
     }

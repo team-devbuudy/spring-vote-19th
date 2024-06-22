@@ -9,7 +9,6 @@ import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.Getter;
-import lombok.RequiredArgsConstructor;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -29,8 +28,8 @@ public class JwtFilter extends OncePerRequestFilter { //스프링 시큐리티 f
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
             throws ServletException, IOException {
 
-        // request에서 Authorization 헤더를 추출
-        String authorization = request.getHeader("Authorization");
+        // request에서 Access 헤더를 추출
+        String authorization = request.getHeader("Access");
 
         //Authorization 헤더 검증
         if (authorization == null || !authorization.startsWith("Bearer ")) {
@@ -53,12 +52,13 @@ public class JwtFilter extends OncePerRequestFilter { //스프링 시큐리티 f
             return; //토큰이 만료되었다면 종료
         }
 
-        // token에서 username, role을 획득
-        String username = jwtUtil.getUsername(token);
+        // token에서 loginId, role을 획득
+        String loginId = jwtUtil.getLoginId(token);
         String role = jwtUtil.getRole(token);
 
+
         Member member = Member.builder()
-                .name(username)
+                .name(loginId)
                 .role(Role.fromText(role))
                 .build();
 
