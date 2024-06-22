@@ -1,6 +1,7 @@
 package ceos.springvote.jwt;
 
 import ceos.springvote.application.CustomUserDetailsService;
+import ceos.springvote.application.MemberService;
 import ceos.springvote.jwt.filter.JwtFilter;
 import ceos.springvote.jwt.filter.LoginFilter;
 import ceos.springvote.jwt.util.JwtUtil;
@@ -55,7 +56,7 @@ public class SecurityConfig {
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception{
         JwtFilter jwtFilter = new JwtFilter(jwtUtil);
-        LoginFilter loginFilter = new LoginFilter(authenticationManager(), jwtUtil);
+        LoginFilter loginFilter = new LoginFilter(authenticationManager(), jwtUtil, memberRepository);
 
         loginFilter.setFilterProcessesUrl("/login");
         http.

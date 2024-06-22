@@ -1,7 +1,11 @@
 package ceos.springvote.jwt.filter;
 
+import ceos.springvote.application.MemberService;
+import ceos.springvote.domain.Member;
+import ceos.springvote.dto.LoginResponseDTO;
 import ceos.springvote.jwt.util.JwtUtil;
 import ceos.springvote.jwt.domain.CustomUserDetails;
+import ceos.springvote.repository.MemberRepository;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -9,6 +13,7 @@ import jakarta.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.util.Collection;
 import java.util.Iterator;
+
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -18,15 +23,15 @@ import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.springframework.transaction.annotation.Transactional;
 
-import java.util.Map;
-import java.util.HashMap;
 
 @RequiredArgsConstructor
 public class LoginFilter extends UsernamePasswordAuthenticationFilter {
 
     private final AuthenticationManager authenticationManager;
     private final JwtUtil jwtUtil;
+    private final MemberRepository memberRepository;
     private final ObjectMapper objectMapper = new ObjectMapper(); // JSON 파서를 위한 ObjectMapper
 
     @Override
@@ -48,9 +53,12 @@ public class LoginFilter extends UsernamePasswordAuthenticationFilter {
 
     //Login 성공시 실행하는 메소드 (JWT 발급 과정)
     @Override
+    @Transactional(readOnly = true)
     protected void successfulAuthentication(HttpServletRequest request, HttpServletResponse response,
                                             FilterChain filterChain, Authentication authentication) {
+
         CustomUserDetails userDetails = (CustomUserDetails) authentication.getPrincipal();
+        Member member = memberRepository.findByLoginIdWithTeam(userDetails.getLoginId());
 
         String loginId = userDetails.getLoginId();
 
@@ -62,28 +70,23 @@ public class LoginFilter extends UsernamePasswordAuthenticationFilter {
         String token = jwtUtil.createJwt(loginId, role, 1000 * 60 * 60L);
 
         response.addHeader("Access", "Bearer "+token);
-
-        // 회원 정보를 JSON 형식으로 변환
-        String userInfoJson;
-        try {
-            // 필요한 회원 정보만 포함하도록 새로운 객체 생성
-            Map<String, Object> userInfo = new HashMap<>();
-            userInfo.put("loginId", userDetails.getLoginId());
-            userInfo.put("password", userDetails.getPassword());
-            userInfo.put("username", userDetails.getUsername());
-            userInfo.put("role", role);
-
-            // JSON으로 변환
-            userInfoJson = objectMapper.writeValueAsString(userInfo);
-        } catch (Exception e) {
-            throw new RuntimeException("Failed to convert user info to JSON", e);
-        }
+        // 필요한 회원 정보만 포함하도록 LoginResponseDTO 객체 생성
+        LoginResponseDTO loginResponseDTO = new LoginResponseDTO(
+                userDetails.getLoginId(),
+                userDetails.getUsername(),
+                userDetails.getPart().getText(),
+                member.getTeam() != null ? member.getTeam().getName() : null,
+                userDetails.getEmail(),
+                userDetails.getVoteCount(),
+                role,
+                token
+        );
 
         // 응답 본문에 회원 정보 추가
         try {
             response.setContentType("application/json");
             response.setCharacterEncoding("UTF-8");
-            response.getWriter().write(userInfoJson);
+            objectMapper.writeValue(response.getWriter(), loginResponseDTO);
         } catch (IOException e) {
             throw new RuntimeException("Failed to write user info to response", e);
         }

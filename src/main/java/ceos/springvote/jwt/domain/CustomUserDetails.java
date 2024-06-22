@@ -1,6 +1,6 @@
 package ceos.springvote.jwt.domain;
 
-import ceos.springvote.constant.Role;
+import ceos.springvote.constant.Part;
 import ceos.springvote.domain.Member;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.GrantedAuthority;
@@ -37,6 +37,12 @@ public class CustomUserDetails implements UserDetails {
     }
 
     public String getLoginId() {return member.getLoginId();}
+
+    public Part getPart() {return member.getPart();}
+
+    public String getEmail() {return member.getEmail();}
+
+    public int getVoteCount() {return member.getVoteCount();}
 
     @Override
     public boolean isAccountNonExpired() {
