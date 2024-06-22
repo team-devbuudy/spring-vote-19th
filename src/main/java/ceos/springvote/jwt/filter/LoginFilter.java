@@ -6,17 +6,22 @@ import ceos.springvote.dto.LoginResponseDTO;
 import ceos.springvote.jwt.util.JwtUtil;
 import ceos.springvote.jwt.domain.CustomUserDetails;
 import ceos.springvote.repository.MemberRepository;
+import com.fasterxml.jackson.core.type.TypeReference;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 
 import java.io.IOException;
+import java.io.InputStream;
 import java.util.Collection;
 import java.util.Iterator;
+import java.util.Map;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.AuthenticationServiceException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
@@ -38,9 +43,24 @@ public class LoginFilter extends UsernamePasswordAuthenticationFilter {
     public Authentication attemptAuthentication(HttpServletRequest request, HttpServletResponse response)
             throws AuthenticationException {
 
-        //client 요청에서 loginId, password 추출
-        String loginId = obtainLoginId(request);
-        String password = obtainPassword(request);
+        String loginId;
+        String password;
+
+    // Content-Type이 application/json인지 확인
+        if (MediaType.APPLICATION_JSON_VALUE.equals(request.getContentType())) {
+            // JSON 데이터 읽기
+            try (InputStream inputStream = request.getInputStream()) {
+                Map<String, String> jsonRequest = objectMapper.readValue(inputStream, new TypeReference<Map<String, String>>() {});
+                loginId = jsonRequest.get("loginId");
+                password = jsonRequest.get("password");
+            } catch (IOException e) {
+                throw new AuthenticationServiceException("Failed to read loginId and password from JSON request", e);
+            }
+        } else {
+            // 폼 데이터에서 추출
+            loginId = obtainLoginId(request);
+            password = obtainPassword(request);
+        }
 
         //spring security에서 loginId와 password 검증하려면 token(DTO)에 담아야 함
         UsernamePasswordAuthenticationToken authToken = new UsernamePasswordAuthenticationToken(loginId, password,
@@ -76,10 +96,7 @@ public class LoginFilter extends UsernamePasswordAuthenticationFilter {
                 userDetails.getUsername(),
                 userDetails.getPart().getText(),
                 member.getTeam() != null ? member.getTeam().getName() : null,
-                userDetails.getEmail(),
-                userDetails.getVoteCount(),
-                role,
-                token
+                userDetails.getEmail()
         );
 
         // 응답 본문에 회원 정보 추가

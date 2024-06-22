@@ -74,7 +74,7 @@ public class VoteController {
     }
 
     @DeleteMapping("/leader/{memberId}")
-    @Operation(summary = "파트장 투표", description = "파트장 투표수를 -1")
+    @Operation(summary = "파트장 투표 취소", description = "파트장 투표수를 -1")
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "투표 성공 시 성공 메시지를 반환합니다"),
             @ApiResponse(responseCode = "404", description = "후보자가 존재하지 않을 경우 에러 메시지를 반환합니다")
