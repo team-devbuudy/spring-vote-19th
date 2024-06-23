@@ -10,6 +10,7 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
@@ -36,9 +37,13 @@ public class MemberController {
             @ApiResponse(responseCode = "409", description = "아이디 혹은 이메일이 중복이면 에러 정보를 반환합니다",
                     content = {@Content(mediaType = "application/json",
                     schema = @Schema(implementation = ResponseTemplate.class))
-            })
+            }),
+            @ApiResponse(responseCode = "400", description = "입력 변수가 1개라도 누락되면 에러 정보를 반환합니다",
+                    content = {@Content(mediaType = "application/json",
+                            schema = @Schema(implementation = ResponseTemplate.class))
+                    })
     })
-    public ResponseEntity<Long> join(@RequestBody MemberRequestDto request) throws CustomException{
+    public ResponseEntity<Long> join(@RequestBody @Valid MemberRequestDto request) throws CustomException{
         System.out.println(request.getLoginId());
         return ResponseEntity.ok(memberService.join(request));
     }
