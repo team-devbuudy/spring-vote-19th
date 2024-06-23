@@ -10,6 +10,8 @@ import ceos.springvote.repository.MemberRepository;
 import ceos.springvote.repository.TeamRepository;
 import ceos.springvote.repository.VoteRepository;
 import java.util.List;
+import java.util.Optional;
+
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -41,8 +43,8 @@ public class VoteService {
         );
         target.addVoteCount();
         return VoteResponseDto.builder()
-                .message("데모데이 투표가 완료되었습니다")
                 .currentVoteCount(target.getVoteCount())
+                .message("데모데이 투표가 완료되었습니다")
                 .build();
     }
 
@@ -51,10 +53,13 @@ public class VoteService {
         Team target = teamRepository.findById(teamId).orElseThrow(
                 () -> new CustomException(VoteErrorCode.TEAM_NOT_EXIST)
         );
-        target.subVoteCount();
+
+        Optional<Integer> result = target.subVoteCount();
+        result.orElseThrow(() -> new CustomException(VoteErrorCode.VOTECOUNT_ALREADY_ZERO));
+
         return VoteResponseDto.builder()
-                .message("데모데이 투표 취소가 완료되었습니다")
                 .currentVoteCount(target.getVoteCount())
+                .message("데모데이 투표 취소가 완료되었습니다")
                 .build();
     }
 
@@ -65,8 +70,8 @@ public class VoteService {
         );
         target.addVoteCount();
         return VoteResponseDto.builder()
-                .message("파트장 투표가 완료되었습니다")
                 .currentVoteCount(target.getVoteCount())
+                .message("파트장 투표가 완료되었습니다")
                 .build();
     }
 
@@ -75,10 +80,12 @@ public class VoteService {
         Member target = memberRepository.findById(memberId).orElseThrow(
                 () -> new CustomException(VoteErrorCode.LEADER_NOT_EXIST)
         );
-        target.subVoteCount();
+        Optional<Integer> result = target.subVoteCount();
+        result.orElseThrow(() -> new CustomException(VoteErrorCode.VOTECOUNT_ALREADY_ZERO));
+
         return VoteResponseDto.builder()
-                .message("파트장 투표 취소가 완료되었습니다")
                 .currentVoteCount(target.getVoteCount())
+                .message("파트장 투표 취소가 완료되었습니다")
                 .build();
     }
 }

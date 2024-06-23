@@ -10,6 +10,8 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
+import java.util.Optional;
+
 @Entity
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
@@ -19,14 +21,19 @@ public class Team {
     @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
     private String name;
-    private int voteCount = 0;
+    private Integer voteCount = 0;
 
 
     public void addVoteCount() {
         this.voteCount ++;
     }
 
-    public void subVoteCount() {
-        this.voteCount --;
+    public Optional<Integer> subVoteCount() {
+        int temp = this.voteCount;
+        if (temp == 0) {
+            return Optional.empty();
+        }
+        this.voteCount--;
+        return Optional.of(temp);
     }
 }

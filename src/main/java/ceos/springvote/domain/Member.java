@@ -12,6 +12,8 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import ceos.springvote.domain.Team;
 
+import java.util.Optional;
+
 @Entity
 @Getter
 @Builder
@@ -46,14 +48,19 @@ public class Member {
     private Team team;
 
     @Builder.Default
-    private int voteCount = 0;
+    private Integer voteCount = 0;
 
     public void addVoteCount() {
         this.voteCount++;
     }
 
-    public void subVoteCount() {
+    public Optional<Integer> subVoteCount() {
+        int temp = this.voteCount;
+        if (temp == 0) {
+            return Optional.empty();
+        }
         this.voteCount--;
+        return Optional.of(temp);
     }
 
 }
