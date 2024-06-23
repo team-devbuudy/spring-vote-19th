@@ -35,6 +35,7 @@ public class SecurityConfig {
     private final JwtUtil jwtUtil;
     private final MemberRepository memberRepository;
 
+
     @Bean
     CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration config = new CorsConfiguration();
@@ -52,10 +53,6 @@ public class SecurityConfig {
         return new BCryptPasswordEncoder();
     }
 
-//    @Bean
-//    public AuthenticationManager authenticationManager(AuthenticationConfiguration configuration) throws Exception {
-//        return configuration.getAuthenticationManager();
-//    }
 
     @Bean
     public UserDetailsService customService() {
@@ -89,7 +86,7 @@ public class SecurityConfig {
         http
                 .authorizeHttpRequests((auth) -> auth
                         .requestMatchers("/login", "/", "/members/join", "/swagger-ui/**", "/v3/api-docs/**", "/swagger-ui.html", "/webjars/**").permitAll()
-                        .requestMatchers("/vote").hasRole("USER")
+                        .requestMatchers("/votes").hasRole("USER")
                         .anyRequest().authenticated());
 
         http

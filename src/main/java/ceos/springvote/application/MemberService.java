@@ -28,7 +28,6 @@ public class MemberService {
     private final MemberRepository memberRepository;
     private final TeamRepository teamRepository;
     private final BCryptPasswordEncoder bCryptPasswordEncoder;
-    // private final BCryptPasswordEncoder encoder = new BCryptPasswordEncoder();
 
     @Transactional
     public Long join(@Valid MemberRequestDto request) throws CustomException {
@@ -36,7 +35,6 @@ public class MemberService {
         Team targetTeam = teamRepository.findById(request.getTeamId())
                 .orElseThrow(() -> new CustomException(MemberErrorCode.TEAM_NOT_EXIST));
         Member member = request.toEntity(targetTeam, bCryptPasswordEncoder.encode(request.getPassword()));
-        //Member member = request.toEntity(targetTeam, request.getPassword());
         isDuplicate(member);
         return memberRepository.save(member).getId();
     }

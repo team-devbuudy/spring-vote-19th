@@ -36,6 +36,8 @@ public class CustomUserDetails implements UserDetails {
         return member.getName();
     }
 
+    public Long getId() {return member.getId();}
+
     public String getLoginId() {return member.getLoginId();}
 
     public Part getPart() {return member.getPart();}
