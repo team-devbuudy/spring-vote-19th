@@ -96,7 +96,8 @@ public class LoginFilter extends UsernamePasswordAuthenticationFilter {
                 userDetails.getUsername(),
                 userDetails.getPart().getText(),
                 member.getTeam() != null ? member.getTeam().getName() : null,
-                userDetails.getEmail()
+                userDetails.getEmail(),
+                token
         );
 
         // 응답 본문에 회원 정보 추가
