@@ -11,4 +11,5 @@ public class LoginResponseDTO {
     private String part;
     private String teamName;
     private String email;
+    private String token;
 }
