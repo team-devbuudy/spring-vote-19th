@@ -44,7 +44,8 @@ public class CustomUserDetails implements UserDetails {
 
     public String getEmail() {return member.getEmail();}
 
-    public int getVoteCount() {return member.getVoteCount();}
+    public Long getId() {return member.getId();}
+
 
     @Override
     public boolean isAccountNonExpired() {

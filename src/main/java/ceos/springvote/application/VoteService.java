@@ -2,6 +2,7 @@ package ceos.springvote.application;
 
 import ceos.springvote.domain.Member;
 import ceos.springvote.domain.Team;
+import ceos.springvote.dto.VoteResponseDto;
 import ceos.springvote.exception.CustomException;
 import ceos.springvote.exception.error.VoteErrorCode;
 import ceos.springvote.repository.MemberRepository;
@@ -25,19 +26,15 @@ public class VoteService {
     private final TeamRepository teamRepository;
 
     public List<Member> getAllCandidates() {
-        return memberRepository.findAll(Sort.by(Direction.DESC,"voteCount"))
-                .stream()
-                .filter(m -> m.getIsLeader().equals(Boolean.TRUE))
-                .toList();
-
+        return memberRepository.findAll(Sort.by(Direction.DESC, "voteCount"));
     }
 
     public List<Team> getAllTeams() {
-        return teamRepository.findAll(Sort.by(Direction.DESC,"voteCount"));
+        return teamRepository.findAll(Sort.by(Direction.DESC, "voteCount"));
     }
 
     @Transactional
-    public List<Team> addDemoVoteCount(Long teamId, Long id) {
+    public VoteResponseDto addDemoVoteCount(Long teamId, Long id) {
         Team target = teamRepository.findById(teamId).orElseThrow(
                 () -> new CustomException(VoteErrorCode.TEAM_NOT_EXIST)
         );
@@ -61,7 +58,7 @@ public class VoteService {
     }
 
     @Transactional
-    public List<Team> subDemoVoteCount(Long teamId, Long id) {
+    public VoteResponseDto subDemoVoteCount(Long teamId, Long id) {
         Team target = teamRepository.findById(teamId).orElseThrow(
                 () -> new CustomException(VoteErrorCode.TEAM_NOT_EXIST)
         );
@@ -80,8 +77,8 @@ public class VoteService {
     }
 
     @Transactional
-    public List<Member> addLeaderVoteCount(Long leaderId, Long id) {
-        Member target = memberRepository.findById(leaderId).orElseThrow(
+    public VoteResponseDto addLeaderVoteCount(Long memberId, Long id) {
+        Member target = memberRepository.findById(memberId).orElseThrow(
                 () -> new CustomException(VoteErrorCode.LEADER_NOT_EXIST)
         );
 
@@ -110,7 +107,7 @@ public class VoteService {
     }
 
     @Transactional
-    public List<Member> subLeaderVoteCount(Long memberId, Long id) {
+    public VoteResponseDto subLeaderVoteCount(Long memberId, Long id) {
         Member target = memberRepository.findById(memberId).orElseThrow(
                 () -> new CustomException(VoteErrorCode.LEADER_NOT_EXIST)
         );
