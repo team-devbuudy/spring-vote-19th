@@ -5,20 +5,14 @@ import ceos.springvote.domain.Team;
 import ceos.springvote.dto.MemberRequestDto;
 import ceos.springvote.exception.error.MemberErrorCode;
 import ceos.springvote.exception.CustomException;
-import ceos.springvote.jwt.domain.CustomUserDetails;
 import ceos.springvote.repository.MemberRepository;
 import ceos.springvote.repository.TeamRepository;
-import java.beans.Encoder;
 
-import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-//import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
-import org.hibernate.Hibernate;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.validation.annotation.Validated;
 
 @Service
 @RequiredArgsConstructor
@@ -30,7 +24,7 @@ public class MemberService {
     private final BCryptPasswordEncoder bCryptPasswordEncoder;
 
     @Transactional
-    public Long join(@Valid MemberRequestDto request) throws CustomException {
+    public Long join(MemberRequestDto request) throws CustomException {
 
         Team targetTeam = teamRepository.findById(request.getTeamId())
                 .orElseThrow(() -> new CustomException(MemberErrorCode.TEAM_NOT_EXIST));
