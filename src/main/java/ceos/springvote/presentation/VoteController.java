@@ -3,7 +3,6 @@ package ceos.springvote.presentation;
 import ceos.springvote.application.VoteService;
 import ceos.springvote.domain.Member;
 import ceos.springvote.domain.Team;
-import ceos.springvote.dto.VoteResponseDto;
 import ceos.springvote.jwt.domain.CustomUserDetails;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
@@ -49,9 +48,9 @@ public class VoteController {
             @ApiResponse(responseCode = "404", description = "팀이 존재하지 않을 경우 에러 메시지를 반환합니다"),
             @ApiResponse(responseCode = "409", description = "이미 투표를 진행했을 경우 에러 메시지를 반환합니다")
     })
-    public ResponseEntity<VoteResponseDto> voteDemo(@PathVariable Long teamId
+    public ResponseEntity<List<Team>> voteDemo(@PathVariable Long teamId
             , @AuthenticationPrincipal CustomUserDetails currentUser) {
-        return ResponseEntity.ok(voteService.addDemoVoteCount(teamId, currentUser.getId()));
+        return ResponseEntity.ok(voteService.addDemoVoteCount(teamId, currentUser.getLoginId()));
     }
 
     @DeleteMapping("/demo/{teamId}")
@@ -60,9 +59,9 @@ public class VoteController {
             @ApiResponse(responseCode = "200", description = "투표 취소 성공 시 성공 메시지를 반환합니다"),
             @ApiResponse(responseCode = "404", description = "팀 혹은 이전 투표가 존재하지 않을 경우 에러 메시지를 반환합니다")
     })
-    public ResponseEntity<VoteResponseDto> cancelVoteDemo(@PathVariable Long teamId
+    public ResponseEntity<List<Team>> cancelVoteDemo(@PathVariable Long teamId
             , @AuthenticationPrincipal CustomUserDetails currentUser) {
-        return ResponseEntity.ok(voteService.subDemoVoteCount(teamId, currentUser.getId()));
+        return ResponseEntity.ok(voteService.subDemoVoteCount(teamId, currentUser.getLoginId()));
     }
 
     @PostMapping("/leader/{memberId}")
@@ -72,9 +71,10 @@ public class VoteController {
             @ApiResponse(responseCode = "404", description = "후보자가 존재하지 않을 경우 에러 메시지를 반환합니다"),
             @ApiResponse(responseCode = "409", description = "이미 투표를 진행했을 경우 에러 메시지를 반환합니다")
     })
-    public ResponseEntity<VoteResponseDto> voteLeader(@PathVariable Long memberId
+    public ResponseEntity<List<Member>> voteLeader(@PathVariable Long memberId
             , @AuthenticationPrincipal CustomUserDetails currentUser) {
-        return ResponseEntity.ok(voteService.addLeaderVoteCount(memberId, currentUser.getId()));
+        log.info("currentUser: {}", currentUser);
+        return ResponseEntity.ok(voteService.addLeaderVoteCount(memberId, currentUser.getLoginId()));
     }
 
     @DeleteMapping("/leader/{memberId}")
@@ -83,9 +83,9 @@ public class VoteController {
             @ApiResponse(responseCode = "200", description = "투표 성공 시 성공 메시지를 반환합니다"),
             @ApiResponse(responseCode = "404", description = "후보자가 존재하지 않을 경우 에러 메시지를 반환합니다")
     })
-    public ResponseEntity<VoteResponseDto> cancelVoteLeader(@PathVariable Long memberId
+    public ResponseEntity<List<Member>> cancelVoteLeader(@PathVariable Long memberId
             , @AuthenticationPrincipal CustomUserDetails currentUser) {
-        return ResponseEntity.ok(voteService.subLeaderVoteCount(memberId, currentUser.getId()));
+        return ResponseEntity.ok(voteService.subLeaderVoteCount(memberId, currentUser.getLoginId()));
     }
 
 }

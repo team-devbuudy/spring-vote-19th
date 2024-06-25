@@ -42,15 +42,6 @@ public class Member {
     @JsonIgnore
     private Role role;
 
-    @JsonIgnore
-    private Boolean isLeader;
-
-    @JsonIgnore
-    private Boolean isEnableVoteLeader = true;
-
-    @JsonIgnore
-    private Boolean isEnableVoteTeam = true;
-
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "team_id")
     @JsonIgnore
@@ -71,21 +62,4 @@ public class Member {
         this.voteCount--;
         return Optional.of(temp);
     }
-
-    public void updateDemoVoteAble() {
-        if (this.isEnableVoteTeam) {
-            this.isEnableVoteTeam = false;
-        } else {
-            this.isEnableVoteTeam = true;
-        }
-    }
-
-    public void updateLeaderVoteAble() {
-        if (this.isEnableVoteLeader) {
-            this.isEnableVoteLeader = false;
-        } else {
-            this.isEnableVoteLeader = true;
-        }
-    }
-
 }

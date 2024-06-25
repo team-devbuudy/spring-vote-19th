@@ -29,9 +29,6 @@ public class MemberRequestDto{
     @NotNull(message = "소속 팀을 선택해주세요")
     Long teamId;
 
-    @NotNull(message = "파트장 여부를 선택해주세요")
-    Boolean isLeader;
-
     public Member toEntity(Team targetTeam, String pwd) {
         return Member.builder()
                 .loginId(loginId)
@@ -41,9 +38,6 @@ public class MemberRequestDto{
                 .team(targetTeam)
                 .role(Role.fromText("USER"))
                 .name(name)
-                .isLeader(isLeader)
-                .isEnableVoteLeader(Boolean.TRUE)
-                .isEnableVoteTeam(Boolean.TRUE)
                 .build();
     }
 }

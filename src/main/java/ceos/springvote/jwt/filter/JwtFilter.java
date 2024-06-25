@@ -58,7 +58,7 @@ public class JwtFilter extends OncePerRequestFilter { //스프링 시큐리티 f
 
 
         Member member = Member.builder()
-                .name(loginId)
+                .loginId(loginId)
                 .role(Role.fromText(role))
                 .build();
 

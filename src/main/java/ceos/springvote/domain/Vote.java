@@ -16,12 +16,14 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.experimental.SuperBuilder;
 import org.springframework.data.annotation.CreatedDate;
 
 @Entity
 @Inheritance(strategy = InheritanceType.SINGLE_TABLE)
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
+@SuperBuilder
 public class Vote {
     @Id @GeneratedValue
     @Column(name = "vote_id")
@@ -35,5 +37,14 @@ public class Vote {
     @Column(updatable = false)
     private LocalDateTime createdAt;
 
+    private int voteCount = 0;
+
     private Boolean isEnable = true;
+
+    public void addVoteCount(){
+        voteCount++;
+    }
+    public void subVoteCount(){
+        voteCount--;
+    }
 }

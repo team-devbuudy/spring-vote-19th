@@ -1,14 +1,16 @@
 package ceos.springvote.application;
 
+import ceos.springvote.domain.DemoVote;
+import ceos.springvote.domain.LeaderVote;
 import ceos.springvote.domain.Member;
 import ceos.springvote.domain.Team;
-import ceos.springvote.dto.VoteResponseDto;
 import ceos.springvote.exception.CustomException;
 import ceos.springvote.exception.error.VoteErrorCode;
+import ceos.springvote.repository.DemoVoteRepository;
+import ceos.springvote.repository.LeaderVoteRepository;
 import ceos.springvote.repository.MemberRepository;
 import ceos.springvote.repository.TeamRepository;
 import java.util.List;
-import java.util.Optional;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -24,6 +26,8 @@ import org.springframework.transaction.annotation.Transactional;
 public class VoteService {
     private final MemberRepository memberRepository;
     private final TeamRepository teamRepository;
+    private final DemoVoteRepository demoVoteRepository;
+    private final LeaderVoteRepository leaderVoteRepository;
 
     public List<Member> getAllCandidates() {
         return memberRepository.findAll(Sort.by(Direction.DESC, "voteCount"));
@@ -34,12 +38,12 @@ public class VoteService {
     }
 
     @Transactional
-    public VoteResponseDto addDemoVoteCount(Long teamId, Long id) {
+    public List<Team> addDemoVoteCount(Long teamId, String loginId) {
         Team target = teamRepository.findById(teamId).orElseThrow(
                 () -> new CustomException(VoteErrorCode.TEAM_NOT_EXIST)
         );
 
-        Member member = memberRepository.findById(id).orElseThrow(
+        Member member = memberRepository.findByLoginId(loginId).orElseThrow(
                 () -> new CustomException(VoteErrorCode.MEMBER_NOT_EXIST)
         );
 
@@ -47,42 +51,54 @@ public class VoteService {
             throw new CustomException(VoteErrorCode.ILLEGAL_TEAM_VOTE);
         }
 
-        if(member.getIsEnableVoteTeam().equals(Boolean.FALSE)){
-            throw new CustomException(VoteErrorCode.TEAM_VOTE_ALREADY_EXIST);
-        }
-
         target.addVoteCount();
-        member.updateDemoVoteAble();
+        DemoVote vote = demoVoteRepository.findByTeamIdAndMemberId(target.getId(), member.getId());
+        if(vote != null){
+            vote.addVoteCount();
+        }
+        else{
+             demoVoteRepository.save(DemoVote.builder()
+                    .team(target)
+                    .member(member)
+                    .voteCount(1)
+                    .build());
+        }
 
         return teamRepository.findAll(Sort.by(Direction.DESC,"voteCount"));
     }
 
     @Transactional
-    public VoteResponseDto subDemoVoteCount(Long teamId, Long id) {
+    public List<Team> subDemoVoteCount(Long teamId, String loginId) {
         Team target = teamRepository.findById(teamId).orElseThrow(
                 () -> new CustomException(VoteErrorCode.TEAM_NOT_EXIST)
         );
 
-        Member member = memberRepository.findById(id).orElseThrow(
+        Member member = memberRepository.findByLoginId(loginId).orElseThrow(
                 () -> new CustomException(VoteErrorCode.MEMBER_NOT_EXIST)
         );
 
-        if(member.getIsEnableVoteTeam().equals(Boolean.TRUE)){
-            throw new CustomException(VoteErrorCode.TEAM_VOTE_NOT_EXIST);
+        DemoVote vote = demoVoteRepository.findByTeamIdAndMemberId(target.getId(), member.getId());
+        if(vote != null){
+            vote.subVoteCount();
+            if(vote.getVoteCount() == 0){
+                demoVoteRepository.delete(vote);
+            }
+        }
+        else{
+            throw new CustomException(VoteErrorCode.VOTE_NOT_EXIST);
         }
 
         target.subVoteCount();
-        member.updateDemoVoteAble();
         return teamRepository.findAll(Sort.by(Direction.DESC,"voteCount"));
     }
 
     @Transactional
-    public VoteResponseDto addLeaderVoteCount(Long memberId, Long id) {
+    public List<Member> addLeaderVoteCount(Long memberId, String loginId) {
         Member target = memberRepository.findById(memberId).orElseThrow(
                 () -> new CustomException(VoteErrorCode.LEADER_NOT_EXIST)
         );
 
-        Member member = memberRepository.findById(id).orElseThrow(
+        Member member = memberRepository.findByLoginId(loginId).orElseThrow(
                 () -> new CustomException(VoteErrorCode.MEMBER_NOT_EXIST)
         );
 
@@ -90,29 +106,30 @@ public class VoteService {
             throw new CustomException(VoteErrorCode.ILLEGAL_LEADER_VOTE);
         }
 
-        if(target.getIsLeader().equals(Boolean.FALSE)){
-            throw new CustomException(VoteErrorCode.ILLEGAL_LEADER_VOTE);
+        LeaderVote vote = leaderVoteRepository.findByLeaderIdAndMemberId(target.getId(), member.getId());
+        if(vote != null){
+            vote.addVoteCount();
         }
-
-        if(member.getIsEnableVoteLeader().equals(Boolean.FALSE)){
-            throw new CustomException(VoteErrorCode.LEADER_VOTE_ALREADY_EXIST);
+        else{
+            leaderVoteRepository.save(LeaderVote.builder()
+                    .leader(target)
+                    .member(member)
+                    .voteCount(1)
+                    .build());
         }
 
         target.addVoteCount();
-        member.updateLeaderVoteAble();
-        return memberRepository.findAll(Sort.by(Direction.DESC,"voteCount"))
-                .stream()
-                .filter(m -> m.getIsLeader().equals(Boolean.TRUE))
-                .toList();
+
+        return memberRepository.findAll(Sort.by(Direction.DESC,"voteCount"));
     }
 
     @Transactional
-    public VoteResponseDto subLeaderVoteCount(Long memberId, Long id) {
+    public List<Member> subLeaderVoteCount(Long memberId, String loginId) {
         Member target = memberRepository.findById(memberId).orElseThrow(
                 () -> new CustomException(VoteErrorCode.LEADER_NOT_EXIST)
         );
 
-        Member member = memberRepository.findById(id).orElseThrow(
+        Member member = memberRepository.findByLoginId(loginId).orElseThrow(
                 () -> new CustomException(VoteErrorCode.MEMBER_NOT_EXIST)
         );
 
@@ -120,18 +137,18 @@ public class VoteService {
             throw new CustomException(VoteErrorCode.ILLEGAL_LEADER_VOTE);
         }
 
-        if(target.getIsLeader().equals(Boolean.FALSE)){
-            throw new CustomException(VoteErrorCode.ILLEGAL_LEADER_VOTE);
+        LeaderVote vote = leaderVoteRepository.findByLeaderIdAndMemberId(target.getId(), member.getId());
+        if(vote != null){
+            vote.subVoteCount();
+            if(vote.getVoteCount() == 0){
+                leaderVoteRepository.delete(vote);
+            }
+        }
+        else{
+            throw new CustomException(VoteErrorCode.VOTE_NOT_EXIST);
         }
 
-        if(member.getIsEnableVoteLeader().equals(Boolean.FALSE)){
-            throw new CustomException(VoteErrorCode.LEADER_VOTE_ALREADY_EXIST);
-        }
         target.subVoteCount();
-        target.updateLeaderVoteAble();
-        return memberRepository.findAll(Sort.by(Direction.DESC,"voteCount"))
-                .stream()
-                .filter(m -> m.getIsLeader().equals(Boolean.TRUE))
-                .toList();
+        return memberRepository.findAll(Sort.by(Direction.DESC,"voteCount"));
     }
 }
