@@ -41,7 +41,11 @@ public class SecurityConfig {
         CorsConfiguration config = new CorsConfiguration();
         config.setAllowedHeaders(Collections.singletonList("*")); //모든 종류의 HTTP 헤더를 허용하도록 설정
         config.setAllowedMethods(Collections.singletonList("*")); //모든 종류의 HTTP 메소드를 허용하도록 설정
-        config.setAllowedOriginPatterns(Arrays.asList("http://localhost:3000", "http://43.201.123.205:3000")); // 허용할 origin 추가
+        config.setAllowedOriginPatterns(
+                Arrays.asList(
+                        "http://localhost:3000",
+                        "http://43.201.123.205:3000",
+                        "https://react-vote-19th-two.vercel.app")); // 허용할 origin 추가
         config.setAllowCredentials(true); //인증 정보와 관련된 요청을 허용
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
         source.registerCorsConfiguration("/**", config);
@@ -49,7 +53,7 @@ public class SecurityConfig {
     }
 
     @Bean
-    public BCryptPasswordEncoder bCryptPasswordEncoder(){
+    public BCryptPasswordEncoder bCryptPasswordEncoder() {
         return new BCryptPasswordEncoder();
     }
 
@@ -58,6 +62,7 @@ public class SecurityConfig {
     public UserDetailsService customService() {
         return new CustomUserDetailsService(memberRepository); // 빈으로 등록된 UserDetailsService
     }
+
     @Bean
     AuthenticationManager authenticationManager() {
         DaoAuthenticationProvider provider = new DaoAuthenticationProvider();
@@ -67,7 +72,7 @@ public class SecurityConfig {
     }
 
     @Bean
-    public SecurityFilterChain filterChain(HttpSecurity http) throws Exception{
+    public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
 
         JwtFilter jwtFilter = new JwtFilter(jwtUtil);
         LoginFilter loginFilter = new LoginFilter(authenticationManager(), jwtUtil, memberRepository);
@@ -78,14 +83,15 @@ public class SecurityConfig {
         http.cors(customizer -> customizer.configurationSource(corsConfigurationSource()));
 
         http.
-                csrf((auth)-> auth.disable());
+                csrf((auth) -> auth.disable());
         http.
-                formLogin((auth)->auth.disable());
+                formLogin((auth) -> auth.disable());
         http.
-                httpBasic((auth)->auth.disable());
+                httpBasic((auth) -> auth.disable());
         http
                 .authorizeHttpRequests((auth) -> auth
-                        .requestMatchers("/login", "/", "/members/join", "/swagger-ui/**", "/v3/api-docs/**", "/swagger-ui.html", "/webjars/**").permitAll()
+                        .requestMatchers("/login", "/", "/members/join", "/swagger-ui/**", "/v3/api-docs/**",
+                                "/swagger-ui.html", "/webjars/**").permitAll()
                         .requestMatchers("/votes").hasRole("USER")
                         .anyRequest().authenticated());
 
@@ -99,7 +105,6 @@ public class SecurityConfig {
 
         return http.build();
     }
-
 
 
 }
