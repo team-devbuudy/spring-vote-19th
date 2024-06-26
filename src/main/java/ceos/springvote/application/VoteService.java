@@ -30,11 +30,11 @@ public class VoteService {
     private final LeaderVoteRepository leaderVoteRepository;
 
     public List<Member> getAllCandidates() {
-        return memberRepository.findAll(Sort.by(Direction.DESC, "voteCount"));
+        return memberRepository.findAll();
     }
 
     public List<Team> getAllTeams() {
-        return teamRepository.findAll(Sort.by(Direction.DESC, "voteCount"));
+        return teamRepository.findAll();
     }
 
     @Transactional

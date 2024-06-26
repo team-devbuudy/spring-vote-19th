@@ -12,7 +12,7 @@ public enum VoteErrorCode {
     MEMBER_NOT_EXIST(HttpStatus.NOT_FOUND, "ID에 해당하는 유저가 존재하지 않습니다." ),
     ILLEGAL_TEAM_VOTE(HttpStatus.BAD_REQUEST, "자신의 팀을 투표할 수 없습니다." ),
     TEAM_VOTE_NOT_EXIST(HttpStatus.NOT_FOUND, "Team에 대한 투표가 존재하지 않습니다" ),
-    ILLEGAL_LEADER_VOTE(HttpStatus.BAD_REQUEST, "파트장이 아닌 사람을 투표할 수 없습니다." ),
+    ILLEGAL_LEADER_VOTE(HttpStatus.BAD_REQUEST, "같은 파트가 아닌 사람을 투표할 수 없습니다." ),
     VOTE_NOT_EXIST(HttpStatus.NOT_FOUND, "진행한 투표가 없습니다" );
     private final HttpStatus httpStatus;
     private final String message;
